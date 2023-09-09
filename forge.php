@@ -11,8 +11,10 @@ require 'contrib/slack.php';
 /**
  * Configures the host and variables from Forge and the environment.
  */
-function configure_forge(bool $trigger_forge_deployment = false): void
-{
+function configure_forge(
+    bool $trigger_forge_deployment = false,
+    string $deployer_directory = 'deployer',
+): void {
     // Defines constants from environment variables
     \define('FORGE_API_KEY', getenv('FORGE_API_KEY'));
     \define('SLACK_WEBHOOK_URL', getenv('SLACK_WEBHOOK_URL'));
@@ -21,7 +23,7 @@ function configure_forge(bool $trigger_forge_deployment = false): void
     \define('RUNNER_ID', getenv('RUNNER_ID'));
 
     // Calls Forge to obtain host settings
-    [$hostname, $remote_user, $site_name, $deploy_path, $current_path, $deployment_url] = get_host_settings_from_forge();
+    [$hostname, $remote_user, $site_name, $deploy_path, $current_path, $deployment_url] = get_host_settings_from_forge($deployer_directory);
 
     host($hostname)
         ->setRemoteUser($remote_user)
@@ -120,7 +122,7 @@ function call_forge_api(string $endpoint): array
 /**
  * Fetches settings required by Deployer from Forge.
  */
-function get_host_settings_from_forge(): array
+function get_host_settings_from_forge(string $deployer_directory): array
 {
     // Since this function is executed on each task call,
     // we cache the settings to avoid repetitive API calls
@@ -153,7 +155,7 @@ function get_host_settings_from_forge(): array
             $host, // hostname/ip
             $remote_user, // user on the server
             $site_name,
-            "/home/{$remote_user}/deployer/{$site_name}", // deployer (deploy path)
+            "/home/{$remote_user}/{$deployer_directory}/{$site_name}", // deployer (deploy path)
             "/home/{$remote_user}/{$site_name}", // actual path (current path)
             $deployment_url, // deployment url
         ]));
