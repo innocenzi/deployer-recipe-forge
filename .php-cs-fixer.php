@@ -1,15 +1,8 @@
 <?php
 
 $finder = Symfony\Component\Finder\Finder::create()
-    ->in([
-        __DIR__ . '/config',
-        __DIR__ . '/app',
-        // __DIR__ . '/src',
-        __DIR__ . '/routes',
-        __DIR__ . '/tests',
-    ])
-    ->name('*.php')
-    ->notName('*.blade.php')
+    ->in(__DIR__)
+    ->name('forge.php')
     ->ignoreDotFiles(true)
     ->ignoreVCS(true);
 
@@ -98,6 +91,6 @@ return (new PhpCsFixer\Config())
             'scope' => 'namespaced',
             'strict' => true,
         ],
-				'static_lambda' => false,
+        'static_lambda' => false,
     ])
     ->setFinder($finder);
