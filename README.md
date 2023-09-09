@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://packagist.org/packages/innocenzi/deployer-recipe-forge">
-    <img alt="release version" src="https://img.shields.io/github/v/release/innocenzi/deployer-recipe-forge">
+    <img alt="release version" src="https://img.shields.io/github/v/release/innocenzi/deployer-recipe-forge?include_prereleases">
   </a>
   <br />
   <br />
