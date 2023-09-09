@@ -23,7 +23,7 @@ function configure_forge(
     \define('RUNNER_ID', getenv('RUNNER_ID'));
 
     // Calls Forge to obtain host settings
-    [$hostname, $remote_user, $site_name, $deploy_path, $current_path, $deployment_url] = get_host_settings_from_forge($deployer_directory);
+    [$hostname, $remote_user, $site_name, $deploy_path, $current_path, $deployment_url, $forge_site_url] = get_host_settings_from_forge($deployer_directory);
 
     host($hostname)
         ->setRemoteUser($remote_user)
@@ -42,6 +42,7 @@ function configure_forge(
     // Git/site variables
     set('site_name', $site_name);
     set('site_url', "https://{$site_name}");
+    set('forge_site_url', $forge_site_url);
     set('repository_name', REPOSITORY_NAME);
     set('repository_url', 'https://github.com/{{repository_name}}');
     set('repository_branch', REPOSITORY_BRANCH);
@@ -83,7 +84,7 @@ function configure_forge(
         set('slack_webhook', SLACK_WEBHOOK_URL);
         set('slack_title', '<{{repository_url}}|{{repository_name}}> ({{repository_branch}})');
         set('slack_text', implode("\n", [
-            '*{{commit_author}}* is deploying to <{{site_url}}>',
+            '*{{commit_author}}* is deploying to <{{site_url}}> (<{{forge_site_url}}|see on Forge>)',
             '*Workflow*: <{{runner_url}}|see on GitHub>',
             '*Commit*: _{{commit_text}}_ (<{{commit_url}}|`{{commit_short_sha}}`>)',
         ]));
@@ -146,7 +147,7 @@ function get_host_settings_from_forge(string $deployer_directory): array
             continue;
         }
 
-        if (strtolower(str_replace('\\/', '/', $site['repository'])) !== REPOSITORY_NAME) {
+        if (strtolower($site['repository']) !== REPOSITORY_NAME) {
             continue;
         }
 
@@ -159,6 +160,7 @@ function get_host_settings_from_forge(string $deployer_directory): array
         $remote_user = $site['username'];
         $site_name = $site['name'];
         $deployment_url = $site['deployment_url'] ?: false;
+        $forge_site_url = "https://forge.laravel.com/servers/{$site['server_id']}/sites/{$site['id']}/application";
 
         file_put_contents('.deployer_cache', json_encode($settings = [
             $host, // hostname/ip
@@ -167,6 +169,7 @@ function get_host_settings_from_forge(string $deployer_directory): array
             "/home/{$remote_user}/{$deployer_directory}/{$site_name}", // deployer (deploy path)
             "/home/{$remote_user}/{$site_name}", // actual path (current path)
             $deployment_url, // deployment url
+            $forge_site_url, // url to access the site on forge
         ]));
 
         return $settings;
