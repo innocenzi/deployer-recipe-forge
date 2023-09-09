@@ -90,11 +90,50 @@ These repository secrets must then be forwarded to the action as environment var
 
 &nbsp;
 
-## Setting up a site on Forge
+## Setting up Forge
 
-> TODO
-> 
-> Basically, do as usual. Setup the repository and branch, deploy the site once.
+### Creating a new site
+
+The following steps explain how to setup a new site on Forge to work with this recipe on GitHub Actions.
+
+1. Create an [isolated](https://forge.laravel.com/docs/sites/user-isolation.html#overview) site.
+
+	 > Currently, this recipe only works with isolated Forge sites. You must then create an isolated site.
+
+2. Install the repository using the [GitHub integration](https://forge.laravel.com/docs/sites/the-basics.html#git-repository).
+   
+	 > You may uncheck "install composer dependencies" to make the installation faster, as the site directory will be erased anyway. <br />
+	 > If you haven't [associated the server's deploy key with your GitHub repository](https://forge.laravel.com/docs/servers/ssh.html#server-ssh-key-git-project-access), make sure that you do or that you [create a deploy key for this site](https://forge.laravel.com/docs/servers/ssh.html#deploy-keys).
+
+3. SSH into the server to copy its public key (`~/.ssh/id_rsa.pub`) and add it to the [server's authorized keys](https://forge.laravel.com/docs/accounts/ssh.html#adding-ssh-key-to-existing-servers) on Forge.
+
+   > This is the first step to allow the Deployer action to SSH into the server.
+
+4. Additionally, add the server's public key (`~/.ssh/id_rsa.pub`) to the [repository's deploy keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys#deploy-keys).
+   
+	 > This will allow Deployer to clone the repository from its SSH session on the server.
+
+5. Finally, SSH into the server to copy its private key (`~/.ssh/id_rsa`) and add it to the [repository's secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository).
+   
+   > This is the last step to allow the Deployer action to SSH into the server. <br />
+	 > We suggest naming the secret after the target environment. For instance, if you are creating a staging site, it may be named `STAGING_SSH_KEY`.
+
+6. You may then trigger the deployment workflow.
+
+&nbsp;
+
+### Adding to an existing site
+
+First, make sure the website is isolated. It must be located at `/home/<isolated-username>/<site-name>` on the server. Otherwise, you must create a [new isolated site](#creating-a-new-site).
+
+You must first **backup your `.env` file and `storage` directory**, since Deployer will delete the site's directory to replace it with a symlink.
+
+After backing them up, you may follow steps 3 to 6. Once the deployment is complete, you may restore your `.env` and `storage` in `/home/<isolated-username>/deployer/<site-name>/shared`.
+
+&nbsp;
+
+> [!WARNING]
+> Proceed with caution. Make sure to put the site on maintenance and think of the potential side-effects that may happen during this migration.
 
 &nbsp;
 
