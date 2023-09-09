@@ -34,12 +34,13 @@ composer require --dev innocenzi/deployer-recipe-forge
 
 &nbsp;
 
-Then, create a `deploy.php` file at the root of your project, and call `configure_forge()`. You may then customize your deployment script as usual with Deployer.
+Then, create a `deploy.php` file at the root of your project. Import the recipe and call `configure_forge()`. You may then customize your deployment script as usual with Deployer.
 
 ```php
 namespace Deployer;
 
 // This is required
+require 'vendor/innocenzi/deployer-recipe-forge/forge.php';
 configure_forge();
 
 // This is your custom deployment script
@@ -167,8 +168,6 @@ Alternatively, you may [set up Slack notifications on Forge](https://forge.larav
 To trigger the deployment on Forge, simply set `trigger_forge_deployment` to `true`:
 
 ```php
-namespace Deployer;
-
 configure_forge(trigger_forge_deployment: true);
 ```
 
