@@ -133,6 +133,9 @@ namespace Deployer;
 configure_forge(trigger_forge_deployment: true);
 ```
 
+> [!WARNING]
+> When using this strategy, make sure to empty the default deployment script configured by Forge.
+
 &nbsp;
 
 ## Multiple environments
