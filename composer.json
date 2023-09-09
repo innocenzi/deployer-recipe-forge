@@ -22,13 +22,7 @@
 		"deployer/deployer": "^7.3"
 	},
 	"require-dev": {
-		"friendsofphp/php-cs-fixer": "^3.26",
-		"spatie/ray": "^1.28"
-	},
-	"autoload-dev": {
-		"files": [
-			"forge.php"
-		]
+		"friendsofphp/php-cs-fixer": "^3.26"
 	},
 	"config": {
 		"sort-packages": true,

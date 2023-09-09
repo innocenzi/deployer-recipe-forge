@@ -5,8 +5,9 @@ namespace Deployer;
 use Deployer\Exception\ConfigurationException;
 use Deployer\Utility\Httpie;
 
-require 'recipe/laravel.php';
-require 'contrib/slack.php';
+$deployer_vendor = \dirname(\constant('DEPLOYER_DEPLOY_FILE')) . '/vendor/deployer/deployer/';
+require $deployer_vendor . 'recipe/laravel.php';
+require $deployer_vendor . 'contrib/slack.php';
 
 /**
  * Configures the host and variables from Forge and the environment.
@@ -177,3 +178,5 @@ function get_host_settings_from_forge(string $deployer_directory): array
 
     throw new \Exception('Could not find Forge site for repository [' . REPOSITORY_NAME . ']');
 }
+
+return configure_forge(...);
