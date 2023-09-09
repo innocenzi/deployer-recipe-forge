@@ -305,7 +305,7 @@ Then, you may add the following script to `composer.json`, and run `composer dep
 # Q&A
 
 **Why not [Envoyer](https://envoyer.io/)?**
-> Envoyer's integration with Forge removes the convenience of being able to manage everything within Forge directly. It forces us to juggle between two different sites, and we also have to pay more. We also believe zero-dowtime deployments should be built in Forge directly.
+> Envoyer's integration with Forge removes the convenience of being able to manage everything within Forge directly, instead forcing us to juggle between two different user interfaces. Our developer experience is better with Deployer and this recipe.
 
 **Why are issues closed?**
 > This recipe is mostly used internally at Jetfly, and we are not willing to do support for it nor add many features. Pull requests for fixes and small additions may be welcome, though.
