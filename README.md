@@ -297,7 +297,7 @@ Then, you may add the following script to `composer.json`, and run `composer dep
 > [!WARNING]
 > Using `dep` locally will create a `.deployer_cache` file, which you should add to `.gitignore`.
 
-> [!INFO]
+> [!NOTE]
 > If you get denied SSH access, make sure to [add your public key on your server](https://forge.laravel.com/docs/accounts/ssh.html#adding-ssh-key-to-existing-servers) and associate it to your site's user.
 
 &nbsp;
