@@ -50,6 +50,15 @@ function configure_forge(
     set('commit_short_sha', fn () => runLocally('git log -n 1 --pretty=format:"%h"'));
     set('commit_text', fn () => runLocally('git log -n 1 --pretty=format:"%s"'));
 
+    // If there is a directory where the symlink should be, we consider it to be
+    // the initial site deployed from Forge, so we delete it.
+    before('deploy:setup', function () {
+        if (test('[ ! -L {{current_path}} ] && [ -d {{current_path}} ]')) {
+            warning('Deleting site directory created by the initial Forge installation ({{current_path}})');
+            run('rm -rf {{current_path}}');
+        }
+    });
+
     // Overrides `deploy:info` with useful informations
     task('deploy:info', function () {
         info('Hostname: {{remote_user}}@{{hostname}}');
