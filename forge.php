@@ -40,7 +40,7 @@ function configure_forge(
     set('runner_id', RUNNER_ID);
     set('runner_url', '{{repository_url}}/actions/runs/{{runner_id}}');
 
-    // Git/site variables
+    // Other variables variables
     set('site_name', $site_name);
     set('site_url', "https://{$site_name}");
     set('forge_site_url', $forge_site_url);
@@ -51,6 +51,7 @@ function configure_forge(
     set('commit_author', fn () => runLocally('git log -n 1 --pretty=format:"%an"'));
     set('commit_short_sha', fn () => runLocally('git log -n 1 --pretty=format:"%h"'));
     set('commit_text', fn () => runLocally('git log -n 1 --pretty=format:"%s"'));
+    set('slack_notifications_enabled', fn () => !empty(SLACK_WEBHOOK_URL));
 
     // If there is a directory where the symlink should be, we consider it to be
     // the initial site deployed from Forge, so we delete it.
@@ -69,18 +70,35 @@ function configure_forge(
         info('Repository branch: {{repository_branch}}');
         info('Repository name: {{repository_url}}');
         info('Commit: {{commit_url}}');
+        info('Slack notifications: {{slack_notifications_enabled}}');
+        info('Forge deployments: {{forge_deployments_enabled}}');
     });
 
-    if ($trigger_forge_deployment) {
-        after('deploy:success', function () use ($deployment_url) {
-            if (!$deployment_url) {
-                return warning('No deployment URL specified for this site.');
-            }
+    // Forge deployments
+    set('forge_deployments_enabled', function () use ($trigger_forge_deployment, $deployment_url) {
+        if (!$trigger_forge_deployment) {
+            return false;
+        }
 
-            info("Pinging Forge deployment URL: {$deployment_url}");
-            call_forge($deployment_url);
-        });
-    } elseif (!empty(SLACK_WEBHOOK_URL)) {
+        if (!$deployment_url) {
+            warning('No deployment URL specified for this site.');
+
+            return false;
+        }
+
+        return true;
+    });
+
+    after('deploy:success', function () use ($deployment_url) {
+        if (!get('forge_deployments_enabled')) {
+            return;
+        }
+
+        info("Pinging Forge deployment URL: {$deployment_url}");
+        call_forge($deployment_url);
+    });
+
+    if (get('slack_notifications_enabled')) {
         // Configures slack integration
         set('slack_webhook', SLACK_WEBHOOK_URL);
         set('slack_title', '<{{repository_url}}|{{repository_name}}> ({{repository_branch}})');
@@ -178,5 +196,3 @@ function get_host_settings_from_forge(string $deployer_directory): array
 
     throw new \Exception('Could not find Forge site for repository [' . REPOSITORY_NAME . ']');
 }
-
-return configure_forge(...);
