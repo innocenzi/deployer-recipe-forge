@@ -11,11 +11,11 @@ require 'contrib/slack.php';
 /**
  * Configures the host and variables from Forge and the environment.
  */
-function configure_forge_deployment(bool $use_forge_deployment = false): void
+function configure_forge(bool $trigger_forge_deployment = false): void
 {
     // Defines constants from environment variables
     \define('FORGE_API_KEY', getenv('FORGE_API_KEY'));
-    \define('SLACK_DEVOPS_WEBHOOK', getenv('SLACK_DEVOPS_WEBHOOK'));
+    \define('SLACK_WEBHOOK_URL', getenv('SLACK_WEBHOOK_URL'));
     \define('REPOSITORY_BRANCH', getenv('REPOSITORY_BRANCH'));
     \define('REPOSITORY_NAME', strtolower(getenv('REPOSITORY_NAME')));
     \define('RUNNER_ID', getenv('RUNNER_ID'));
@@ -58,7 +58,7 @@ function configure_forge_deployment(bool $use_forge_deployment = false): void
         info('Commit: {{commit_url}}');
     });
 
-    if ($use_forge_deployment) {
+    if ($trigger_forge_deployment) {
         after('deploy:success', function () use ($deployment_url) {
             if (!$deployment_url) {
                 return warning('No deployment URL specified for this site.');
@@ -67,9 +67,9 @@ function configure_forge_deployment(bool $use_forge_deployment = false): void
             info("Pinging Forge deployment URL: {$deployment_url}");
             call_forge($deployment_url);
         });
-    } elseif (!empty(SLACK_DEVOPS_WEBHOOK)) {
+    } elseif (!empty(SLACK_WEBHOOK_URL)) {
         // Configures slack integration
-        set('slack_webhook', SLACK_DEVOPS_WEBHOOK);
+        set('slack_webhook', SLACK_WEBHOOK_URL);
         set('slack_title', '<{{repository_url}}|{{repository_name}}> ({{repository_branch}})');
         set('slack_text', implode("\n", [
             '*{{commit_author}}* is deploying to <{{site_url}}>',
