@@ -129,7 +129,7 @@ final class Forge
 
     private function configureDeploymentTriggerOnForge(): void
     {
-        if ($this->shouldTriggerDeploymentsOnForge()) {
+        if (!$this->shouldTriggerDeploymentsOnForge()) {
             return;
         }
 
