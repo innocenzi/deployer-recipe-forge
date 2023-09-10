@@ -23,7 +23,7 @@ return (new PhpCsFixer\Config())
         'ternary_operator_spaces' => true,
         'array_syntax' => ['syntax' => 'short'],
         'ordered_imports' => ['sort_algorithm' => 'alpha'],
-        'ordered_class_elements' => ['sort_algorithm' => 'alpha'],
+        'ordered_class_elements' => true,
         'no_trailing_whitespace_in_string' => false,
         'no_unused_imports' => true,
         'no_useless_else' => true,
