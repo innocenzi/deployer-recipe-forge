@@ -34,14 +34,14 @@ composer require --dev innocenzi/deployer-recipe-forge
 
 &nbsp;
 
-Then, create a `deploy.php` file at the root of your project. Import the recipe and call `configure_forge()`. You may then customize your deployment script as usual with Deployer.
+Then, create a `deploy.php` file at the root of your project. [Import the autoloader](https://github.com/deployphp/deployer/issues/3605), and call `\Deployer\Forge::make()->configure();`. You may then customize your deployment script as usual with Deployer.
 
 ```php
 namespace Deployer;
 
 // This is required
-require 'vendor/innocenzi/deployer-recipe-forge/forge.php';
-configure_forge();
+require __DIR__ . '/vendor/autoload.php';
+\Deployer\Forge::make()->configure();
 
 // This is your custom deployment script
 after('artisan:migrate', 'artisan:optimize');
@@ -165,10 +165,12 @@ This recipe supports sending Slack notifications using a webhook. To create it, 
 
 Alternatively, you may [set up Slack notifications on Forge](https://forge.laravel.com/docs/sites/deployments.html#slack), and trigger a deployment on Forge. This way, you also get to use Forge's deployment history.
 
-To trigger the deployment on Forge, simply set `trigger_forge_deployment` to `true`:
+To trigger the deployment on Forge, simply call `triggerDeploymentsOnForge`:
 
 ```php
-configure_forge(trigger_forge_deployment: true);
+\Deployer\Forge::make()
+	->triggerDeploymentsOnForge()
+	->configure();
 ```
 
 > [!WARNING]
