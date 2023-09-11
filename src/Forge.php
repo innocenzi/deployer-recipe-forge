@@ -51,6 +51,10 @@ final class Forge
                 continue;
             }
 
+            if (\in_array('deployer-ignored', $site['tags'] ?? [], true)) {
+                continue;
+            }
+
             ['server' => $server] = $this->forge->json(endpoint: "servers/{$site['server_id']}");
             $this->configuration->hostname = $server['ip_address'];
             $this->configuration->remoteUser = $site['username'];
