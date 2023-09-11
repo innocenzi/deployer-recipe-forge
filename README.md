@@ -106,15 +106,16 @@ The following steps explain how to setup a new site on Forge to work with this r
 	 > You may uncheck "install composer dependencies" to make the installation faster, as the site directory will be erased anyway. <br />
 	 > If you haven't [associated the server's deploy key with your GitHub repository](https://forge.laravel.com/docs/servers/ssh.html#server-ssh-key-git-project-access), make sure that you do or that you [create a deploy key for this site](https://forge.laravel.com/docs/servers/ssh.html#deploy-keys).
 
-3. SSH into the server to copy its public key (`~/.ssh/id_rsa.pub`) and add it to the [server's authorized keys](https://forge.laravel.com/docs/accounts/ssh.html#adding-ssh-key-to-existing-servers) on Forge.
-
-   > This is the first step to allow the Deployer action to SSH into the server.
-
-4. Additionally, add the server's public key (`~/.ssh/id_rsa.pub`) to the [repository's deploy keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys#deploy-keys).
+3. If necessary, add the server's public key (`~/.ssh/id_rsa.pub`) to the [repository's deploy keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys#deploy-keys).
    
 	 > This will allow Deployer to clone the repository from its SSH session on the server.
 
-5. Finally, SSH into the server to copy its private key (`~/.ssh/id_rsa`) and add it to the [repository's secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository).
+4. SSH into the server to copy its public key (`~/.ssh/id_rsa.pub`) and add it to the [server's authorized keys](https://forge.laravel.com/docs/accounts/ssh.html#adding-ssh-key-to-existing-servers) on Forge.
+
+   > This is the first step to allow the Deployer action to SSH into the server. <br />
+	 > The key should be associated to the correct isolated site username.
+
+5. Finally, copy the server's private key (`~/.ssh/id_rsa`) and add it to the [repository's secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository).
    
    > This is the last step to allow the Deployer action to SSH into the server. <br />
 	 > We suggest naming the secret after the target environment. For instance, if you are creating a staging site, it may be named `STAGING_SSH_KEY`.
