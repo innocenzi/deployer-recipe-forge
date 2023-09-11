@@ -51,7 +51,7 @@ final class Forge
                 continue;
             }
 
-            if (\in_array('deployer-ignored', $site['tags'] ?? [], true)) {
+            if (\in_array('deployer-ignored', array_map(fn (array $tag) => $tag['name'], $site['tags'] ?? []), true)) {
                 continue;
             }
 
