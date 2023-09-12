@@ -103,12 +103,15 @@ final class Forge
         task('timing:setup', function () {
             set('deploy_started_at', time());
             info('Starting: {{deploy_started_at}}');
-        })->addBefore('deploy:info');
+        });
+        before('deploy:info', 'timing:setup');
 
         task('timing:finish', function () {
             set('deploy_seconds', (int) (time() - get('deploy_started_at')));
             info('Finish: {{deploy_started_at}} ({{deploy_seconds}} seconds)');
-        })->addBefore('deploy:success')->addBefore('deploy:failed');
+        });
+        before('deploy:failed', 'timing:finish');
+        before('deploy:success', 'timing:finish');
 
         $this->configureSiteDirectoryDeletion();
         $this->improveDeployInfoTask();
@@ -126,13 +129,15 @@ final class Forge
                 run('cp {{current_path}}/.env .env.backup');
                 run('rm -rf {{current_path}}');
             }
-        })->addBefore('deploy:setup');
+        });
+        before('deploy:setup', 'forge:setup');
 
         task('forge:restore-env', function () {
             if (test('[ -f .env.backup ]')) {
                 run('mv .env.backup {{current_path}}/.env');
             }
-        })->addBefore('deploy:vendors');
+        });
+        before('deploy:vendors', 'forge:restore-env');
     }
 
     private function improveDeployInfoTask(): void
