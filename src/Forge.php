@@ -100,8 +100,14 @@ final class Forge
         set('commit_text', fn () => runLocally('git log -n 1 --pretty=format:"%s"'));
 
         // Timing
-        before('deploy:setup', fn () => set('deploy_started_at', time()));
-        before('deploy:success', fn () => set('deploy_seconds', (int) (time() - get('deploy_started_at'))));
+        before('deploy:setup', function () {
+            set('deploy_started_at', time());
+            info('Starting: {{deploy_started_at}}');
+        });
+        before('deploy:success', function () {
+            set('deploy_seconds', (int) (time() - get('deploy_started_at')));
+            info('Finish: {{deploy_started_at}} ({{deploy_seconds}} seconds)');
+        });
 
         $this->configureSiteDirectoryDeletion();
         $this->improveDeployInfoTask();
