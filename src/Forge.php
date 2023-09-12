@@ -99,6 +99,10 @@ final class Forge
         set('commit_short_sha', fn () => runLocally('git log -n 1 --pretty=format:"%h"'));
         set('commit_text', fn () => runLocally('git log -n 1 --pretty=format:"%s"'));
 
+        // Timing
+        before('deploy:setup', fn () => set('deploy_started_at', time()));
+        before('deploy:success', fn () => set('deploy_seconds', (int) (time() - get('deploy_started_at'))));
+
         $this->configureSiteDirectoryDeletion();
         $this->improveDeployInfoTask();
         $this->configureDeploymentTriggerOnForge();
@@ -150,13 +154,13 @@ final class Forge
         }
 
         set('slack_webhook', $this->environment->slackWebhookUrl);
-        set('slack_title', '{{site_url}}');
+        set('slack_title', '<{{site_url}}|{{site_name}}>');
         set('slack_text', implode("\n", [
             '*{{commit_author}}* is deploying <{{repository_url}}|{{repository_name}}> ({{repository_branch}})',
             '*Links*: <{{runner_url}}|GitHub workflow>, <{{forge_site_url}}|Forge site>',
             '*Commit*: _{{commit_text}}_ (<{{commit_url}}|`{{commit_short_sha}}`>)',
         ]));
-        set('slack_success_text', 'Deployment successful.');
+        set('slack_success_text', 'Deployment successful in {{deploy_seconds}} seconds.');
         set('slack_failure_text', 'Deployment failed.');
         set('slack_rollback_text', '*{{user}}* rolled back last deployment ({{rollback_name}}).');
         set('slack_color', '#38bdf8');
