@@ -100,14 +100,15 @@ final class Forge
         set('commit_text', fn () => runLocally('git log -n 1 --pretty=format:"%s"'));
 
         // Timing
-        before('deploy:setup', function () {
+        task('timing:setup', function () {
             set('deploy_started_at', time());
             info('Starting: {{deploy_started_at}}');
-        });
-        before('deploy:success', function () {
+        })->addBefore('deploy:setup');
+
+        task('timing:finish', function () {
             set('deploy_seconds', (int) (time() - get('deploy_started_at')));
             info('Finish: {{deploy_started_at}} ({{deploy_seconds}} seconds)');
-        });
+        })->addBefore('deploy:success')->addBefore('deploy:failed');
 
         $this->configureSiteDirectoryDeletion();
         $this->improveDeployInfoTask();
@@ -166,8 +167,8 @@ final class Forge
             '*Links*: <{{runner_url}}|GitHub workflow>, <{{forge_site_url}}|Forge site>',
             '*Commit*: _{{commit_text}}_ (<{{commit_url}}|`{{commit_short_sha}}`>)',
         ]));
-        set('slack_success_text', 'Deployment successful in {{deploy_seconds}} seconds.');
-        set('slack_failure_text', 'Deployment failed.');
+        set('slack_success_text', fn () => 'Deployment successful in {{deploy_seconds}} seconds.');
+        set('slack_failure_text', fn () => 'Deployment failed.');
         set('slack_rollback_text', '*{{user}}* rolled back last deployment ({{rollback_name}}).');
         set('slack_color', '#38bdf8');
         set('slack_success_color', '#34d399');
