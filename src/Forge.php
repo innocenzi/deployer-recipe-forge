@@ -103,7 +103,7 @@ final class Forge
         task('timing:setup', function () {
             set('deploy_started_at', time());
             info('Starting: {{deploy_started_at}}');
-        })->addBefore('deploy:setup');
+        })->addBefore('deploy:info');
 
         task('timing:finish', function () {
             set('deploy_seconds', (int) (time() - get('deploy_started_at')));
@@ -144,6 +144,7 @@ final class Forge
             info('Repository branch: {{repository_branch}}');
             info('Repository name: {{repository_url}}');
             info('Commit: {{commit_url}}');
+            info('Starting at: {{deploy_started_at}}');
             info('Slack notifications: ' . ($this->shouldSendSlackNotifications() ? 'yes' : 'no'));
             info('Triggers deployments on Forge: ' . ($this->shouldTriggerDeploymentsOnForge() ? 'yes' : 'no'));
         });
