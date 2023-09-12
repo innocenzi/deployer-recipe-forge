@@ -177,7 +177,7 @@ final class Forge
         set('slack_title', '<{{site_url}}|{{site_name}}>');
         set('slack_text', implode("\n", [
             '*{{commit_author}}* is deploying <{{repository_url}}|{{repository_name}}> ({{repository_branch}})',
-            '*Links*: <{{runner_url}}|GitHub workflow>, <{{forge_site_url}}|Forge site>',
+            '*Links*: <{{runner_url}}|Workflow>, <{{forge_site_url}}|Forge>',
             '*Commit*: _{{commit_text}}_ (<{{commit_url}}|`{{commit_short_sha}}`>)',
         ]));
         set('slack_success_text', fn () => 'Deployment successful in {{deploy_seconds}} seconds.');
