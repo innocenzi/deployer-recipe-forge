@@ -133,8 +133,8 @@ final class Forge
         before('deploy:setup', 'forge:setup');
 
         task('forge:restore-env', function () {
-            if (test('[ -f .env.backup ]')) {
-                run('mv .env.backup {{current_path}}/.env');
+            if (test('[ -f .env.backup ] && [ ! -f {{release_path}}/.env ]')) {
+                run('mv .env.backup {{release_path}}/.env');
             }
         });
         before('deploy:vendors', 'forge:restore-env');
