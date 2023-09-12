@@ -120,12 +120,19 @@ final class Forge
     {
         // If there is a directory where the symlink should be, we consider it to be
         // the initial site deployed from Forge, so we delete it.
-        before('deploy:setup', function () {
+        task('forge:setup', function () {
             if (test('[ ! -L {{current_path}} ] && [ -d {{current_path}} ]')) {
                 warning('Deleting site directory created by the initial Forge installation ({{current_path}})');
+                run('cp {{current_path}}/.env .env.backup');
                 run('rm -rf {{current_path}}');
             }
-        });
+        })->addBefore('deploy:setup');
+
+        task('forge:restore-env', function () {
+            if (test('[ -f .env.backup ]')) {
+                run('mv .env.backup {{current_path}}/.env');
+            }
+        })->addBefore('deploy:vendors');
     }
 
     private function improveDeployInfoTask(): void
