@@ -42,6 +42,16 @@ final class ForgeRecipeBuilder
     }
 
     /**
+     * Specify a remote user to SSH with, instead of fetching the one from Forge.
+     */
+    public function setSshRemoteUser(string $remoteUser): self
+    {
+        $this->configuration->sshRemoteUser = $remoteUser;
+
+        return $this;
+    }
+
+    /**
      * Defines whether Forge deployments should be triggered when a deployment is successful.
      */
     public function triggerDeploymentsOnForge(): self

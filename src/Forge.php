@@ -74,7 +74,7 @@ final class Forge
     private function configureDeployer(): void
     {
         host($this->configuration->hostname)
-            ->setRemoteUser($this->configuration->remoteUser)
+            ->setRemoteUser($this->configuration->sshRemoteUser ?: $this->configuration->remoteUser)
             ->setDeployPath($this->configuration->deployPath);
 
         // Required settings
@@ -150,10 +150,10 @@ final class Forge
         }
 
         set('slack_webhook', $this->environment->slackWebhookUrl);
-        set('slack_title', '<{{repository_url}}|{{repository_name}}> ({{repository_branch}})');
+        set('slack_title', '{{site_url}}');
         set('slack_text', implode("\n", [
-            '*{{commit_author}}* is deploying to <{{site_url}}> (<{{forge_site_url}}|see on Forge>)',
-            '*Workflow*: <{{runner_url}}|see on GitHub>',
+            '*{{commit_author}}* is deploying <{{repository_url}}|{{repository_name}}> ({{repository_branch}})',
+            '*Links*: <{{runner_url}}|GitHub workflow>, <{{forge_site_url}}|Forge site>',
             '*Commit*: _{{commit_text}}_ (<{{commit_url}}|`{{commit_short_sha}}`>)',
         ]));
         set('slack_success_text', 'Deployment successful.');
