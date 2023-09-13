@@ -121,20 +121,33 @@ final class Forge
 
     private function configureSiteDirectoryDeletion(): void
     {
+        set('env_backup', "/home/{$this->configuration->remoteUser}/{$this->configuration->remoteUser}.env.backup");
+
         // If there is a directory where the symlink should be, we consider it to be
         // the initial site deployed from Forge, so we delete it.
         task('forge:setup', function () {
             if (test('[ ! -L {{current_path}} ] && [ -d {{current_path}} ]')) {
+                info('Backing up .env to {{env_backup}}');
+                run('cp {{current_path}}/.env {{env_backup}}');
                 warning('Deleting site directory created by the initial Forge installation ({{current_path}})');
-                run('cp {{current_path}}/.env .env.backup');
                 run('rm -rf {{current_path}}');
             }
         });
         before('deploy:setup', 'forge:setup');
 
         task('forge:restore-env', function () {
-            if (test('[ -f .env.backup ] && [ ! -f {{release_path}}/.env ]')) {
-                run('mv .env.backup {{release_path}}/.env');
+            if (!test('[ -f {{env_backup}} ]')) {
+                info('No backup to restore ({{env_backup}})');
+
+                return;
+            }
+
+            if (test('[ ! -f {{release_path}}/.env ]')) {
+                info('.env does not exist, copying from backup ({{env_backup}})');
+                run('mv {{env_backup}} {{release_path}}/.env');
+            } else {
+                info('.env exists, removing backup ({{env_backup}})');
+                run('rm -rf {{env_backup}}');
             }
         });
         before('deploy:vendors', 'forge:restore-env');
