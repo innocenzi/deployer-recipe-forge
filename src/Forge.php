@@ -146,7 +146,7 @@ final class Forge
             }
 
             if (testLocally('[ ! -d public/build ]')) {
-                return warning('No build directory to upload.');
+                return warning('No assets to upload.');
             }
 
             info('Uploading build directory...');
@@ -159,7 +159,6 @@ final class Forge
             'deploy:prepare-build',
             'deploy:build',
             'deploy:upload-build',
-            'forge:restore-env',
             'artisan:storage:link',
             'artisan:config:cache',
             'artisan:route:cache',
@@ -189,18 +188,12 @@ final class Forge
         before('deploy:setup', 'forge:backup-env');
 
         task('forge:restore-env', function () {
-            if (!test('[ -f {{env_backup}} ]')) {
-                return info('No backup to restore ({{env_backup}})');
-            }
-
-            if (test('[ ! -s {{release_path}}/.env ]')) {
+            if (test('[ ! -s {{deploy_path}}/shared/.env ] && [ -f {{env_backup}} ]')) {
                 info('Restoring backup environment file');
-                run('mv {{env_backup}} {{release_path}}/.env');
-            } else {
-                warning('Cleaning up backup environment file');
-                run('rm -rf {{env_backup}}');
+                run('mv {{env_backup}} {{deploy_path}}/shared/.env');
             }
         });
+        after('deploy:shared', 'forge:restore-env');
     }
 
     private function improveDeployInfoTask(): void
