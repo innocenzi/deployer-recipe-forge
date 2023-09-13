@@ -8,6 +8,7 @@ final class Configuration
     public string $deployerDirectoryName = 'deployer';
     public bool $triggersDeploymentsOnForge = false;
     public bool $disableCache = false;
+    public bool $buildOnCI = true;
     public ?string $sshRemoteUser = null;
 
     // Forge configuration

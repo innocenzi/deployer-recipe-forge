@@ -15,7 +15,13 @@ final class Forge
     {
         $this->loadRecipes();
         $this->loadSettingsFromForge();
-        $this->configureDeployer();
+        $this->configureHostAndVariables();
+        $this->configureTiming();
+        $this->configureSiteDirectoryDeletion();
+        $this->improveDeployInfoTask();
+        $this->configureDeployment();
+        $this->configureDeploymentTriggerOnForge();
+        $this->configureSlackNotifications();
     }
 
     public static function make(): ForgeRecipeBuilder
@@ -71,7 +77,7 @@ final class Forge
         throw new \Exception("Could not find Forge site for repository [{$this->environment->repositoryName}]");
     }
 
-    private function configureDeployer(): void
+    private function configureHostAndVariables(): void
     {
         host($this->configuration->hostname)
             ->setRemoteUser($this->configuration->sshRemoteUser ?: $this->configuration->remoteUser)
@@ -87,7 +93,7 @@ final class Forge
         set('runner_id', $this->environment->githubRunnerId);
         set('runner_url', '{{repository_url}}/actions/runs/{{runner_id}}');
 
-        // Other variables variables
+        // Other variables
         set('site_name', $this->configuration->siteName);
         set('site_url', "https://{$this->configuration->siteName}");
         set('forge_site_url', $this->configuration->forgeSiteUrl);
@@ -98,59 +104,103 @@ final class Forge
         set('commit_author', fn () => runLocally('git log -n 1 --pretty=format:"%an"'));
         set('commit_short_sha', fn () => runLocally('git log -n 1 --pretty=format:"%h"'));
         set('commit_text', fn () => runLocally('git log -n 1 --pretty=format:"%s"'));
+        set('env_backup', "/home/{$this->configuration->remoteUser}/{$this->configuration->remoteUser}.env.backup");
+    }
 
-        // Timing
+    private function configureTiming(): void
+    {
         task('timing:setup', function () {
             set('deploy_started_at', time());
             info('Starting: {{deploy_started_at}}');
         });
-        before('deploy:info', 'timing:setup');
 
         task('timing:finish', function () {
             set('deploy_seconds', (int) (time() - get('deploy_started_at')));
             info('Finish: {{deploy_started_at}} ({{deploy_seconds}} seconds)');
         });
+
+        before('deploy:info', 'timing:setup');
         before('deploy:failed', 'timing:finish');
         before('deploy:success', 'timing:finish');
+    }
 
-        $this->configureSiteDirectoryDeletion();
-        $this->improveDeployInfoTask();
-        $this->configureDeploymentTriggerOnForge();
-        $this->configureSlackNotifications();
+    private function configureDeployment(): void
+    {
+        task('deploy:build', function () {
+            warning('This task should be overriden');
+        });
+
+        task('deploy:prepare-build', function () {
+            if (!$this->configuration->buildOnCI) {
+                return;
+            }
+
+            set('env_to_fetch', test('[ -f {{env_backup}} ]') ? '{{env_backup}}' : '{{release_path}}/.env');
+            info('Fetching {{env_to_fetch}} from Forge');
+            download('{{env_to_fetch}}', '.env', ['flags' => '-azPL']);
+        });
+
+        task('deploy:upload-build', function () {
+            if (!$this->configuration->buildOnCI) {
+                return;
+            }
+
+            if (testLocally('[ ! -d public/build ]')) {
+                return warning('No build directory to upload.');
+            }
+
+            info('Uploading build directory...');
+            upload('public/build/', '{{release_path}}/public/build');
+        });
+
+        task('deploy', [
+            'deploy:prepare',
+            'deploy:vendors',
+            'deploy:prepare-build',
+            'deploy:build',
+            'deploy:upload-build',
+            'forge:restore-env',
+            'artisan:storage:link',
+            'artisan:config:cache',
+            'artisan:route:cache',
+            'artisan:view:cache',
+            'artisan:event:cache',
+            'artisan:migrate',
+            'artisan:optimize',
+            'artisan:queue:restart',
+            'deploy:publish',
+        ]);
+
+        after('deploy:failed', 'deploy:unlock');
     }
 
     private function configureSiteDirectoryDeletion(): void
     {
-        set('env_backup', "/home/{$this->configuration->remoteUser}/{$this->configuration->remoteUser}.env.backup");
-
         // If there is a directory where the symlink should be, we consider it to be
         // the initial site deployed from Forge, so we delete it.
-        task('forge:setup', function () {
+        task('forge:backup-env', function () {
             if (test('[ ! -L {{current_path}} ] && [ -d {{current_path}} ]')) {
-                info('Backing up .env to {{env_backup}}');
+                info('Backing up environment file');
                 run('cp {{current_path}}/.env {{env_backup}}');
                 warning('Deleting site directory created by the initial Forge installation ({{current_path}})');
                 run('rm -rf {{current_path}}');
             }
         });
-        before('deploy:setup', 'forge:setup');
+        before('deploy:setup', 'forge:backup-env');
 
         task('forge:restore-env', function () {
             if (!test('[ -f {{env_backup}} ]')) {
-                info('No backup to restore ({{env_backup}})');
-
-                return;
+                return info('No backup to restore ({{env_backup}})');
             }
 
-            if (test('[ ! -f {{release_path}}/.env ]')) {
-                info('.env does not exist, copying from backup ({{env_backup}})');
+            if (test('[ ! -s {{release_path}}/.env ]')) {
+                info('Restoring backup environment file');
                 run('mv {{env_backup}} {{release_path}}/.env');
             } else {
-                info('.env exists, removing backup ({{env_backup}})');
+                warning('Cleaning up backup environment file');
                 run('rm -rf {{env_backup}}');
             }
         });
-        before('deploy:vendors', 'forge:restore-env');
     }
 
     private function improveDeployInfoTask(): void

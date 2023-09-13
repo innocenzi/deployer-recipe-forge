@@ -31,6 +31,16 @@ final class ForgeRecipeBuilder
     }
 
     /**
+     * Build assets on server instead of CI.
+     */
+    public function buildOnServer(): self
+    {
+        $this->configuration->buildOnCI = false;
+
+        return $this;
+    }
+
+    /**
      * Sets the directory that contains deployments on the server.
      * @default deployer
      */

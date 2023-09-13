@@ -44,16 +44,11 @@ require __DIR__ . '/vendor/autoload.php';
 \Deployer\Forge::make()->configure();
 
 // This is your custom deployment script
-after('artisan:migrate', 'artisan:optimize');
-after('artisan:migrate', 'artisan:queue:restart');
-
-after('deploy:vendors', function () {
-    set('bin/bun', fn () => which('bun'));
-    run('cd {{release_path}} && {{bin/bun}} i');
-    run('cd {{release_path}} && {{bin/bun}} run build');
+task('deploy:build', function () {
+	  // build assets here
+    runLocally('bun i');
+    runLocally('bun run build');
 });
-
-after('deploy:failed', 'deploy:unlock');
 ```
 
 &nbsp;
@@ -227,6 +222,29 @@ steps:
 
 &nbsp;
 
+## Building on CI or on server
+
+By default, the recipe will build assets on CI, and upload them on the server after. To build on the server, call `buildOnServer`:
+
+```php
+\Deployer\Forge::make()
+    ->buildOnServer()
+    ->configure();
+```
+
+Note that, by default, no `deploy:build` task is provided, and you should write your own. For instance, you may build assets using Bun:
+
+```php
+\Deployer\Forge::make()->configure();
+
+task('deploy:build', function () {
+    runLocally('bun i');
+    runLocally('bun run build');
+});
+```
+
+Obviously, make sure Bun is [installed on CI](https://github.com/oven-sh/setup-bun) before using that example.
+
 ## Example workflow
 
 This workflow deploys on production or staging, depending on the branch that pushed, after running the `test.yml` and `style.yml` workflows. It will skip deployments if the commit body contains `[skip deploy]`, and will notify about deployments on Slack.
@@ -261,6 +279,10 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: 8.2
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
 
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
