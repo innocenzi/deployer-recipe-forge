@@ -88,6 +88,7 @@ final class Forge
         set('use_atomic_symlink', false);
         set('update_code_strategy', 'clone');
         set('repository', sprintf('git@github.com:%s.git', $this->environment->repositoryName));
+        set('branch', $this->environment->repositoryBranch);
 
         // GitHub Actions variables
         set('runner_id', $this->environment->githubRunnerId);
