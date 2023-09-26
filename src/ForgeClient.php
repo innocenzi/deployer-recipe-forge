@@ -19,14 +19,18 @@ class ForgeClient
         );
     }
 
-    public function json(string $endpoint): array
+    public function json(string $endpoint): array|false
     {
-        return json_decode(
-            json: Httpie::get("https://forge.laravel.com/api/v1/{$endpoint}")
-                ->header('Authorization', 'Bearer ' . $this->token)
-                ->send(),
-            associative: true,
-        );
+        try {
+            return json_decode(
+                json: Httpie::get("https://forge.laravel.com/api/v1/{$endpoint}")
+                    ->header('Authorization', 'Bearer ' . $this->token)
+                    ->send(),
+                associative: true,
+            );
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     public function triggerDeployment(string $url): void

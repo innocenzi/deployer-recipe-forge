@@ -61,8 +61,11 @@ final class Forge
                 continue;
             }
 
-            ['server' => $server] = $this->forge->json(endpoint: "servers/{$site['server_id']}");
-            $this->configuration->hostname = $server['ip_address'];
+            if (!$server = $this->forge->json(endpoint: "servers/{$site['server_id']}")) {
+                continue;
+            }
+
+            $this->configuration->hostname = $server['server']['ip_address'];
             $this->configuration->remoteUser = $site['username'];
             $this->configuration->siteName = $site['name'];
             $this->configuration->deployPath = "/home/{$this->configuration->remoteUser}/{$this->configuration->deployerDirectoryName}/{$this->configuration->siteName}";
