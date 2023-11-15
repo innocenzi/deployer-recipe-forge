@@ -171,6 +171,7 @@ final class Forge
             'artisan:migrate',
             'artisan:optimize',
             'artisan:queue:restart',
+            ...$this->configuration->terminateHorizon ? ['artisan:horizon:terminate'] : [],
             'deploy:publish',
         ]);
 

@@ -62,6 +62,16 @@ final class ForgeRecipeBuilder
     }
 
     /**
+     * Specify whether to execute the `php artisan horizon:terminate` command after a deployment.
+     */
+    public function terminateHorizon(): self
+    {
+        $this->configuration->terminateHorizon = true;
+
+        return $this;
+    }
+
+    /**
      * Defines whether Forge deployments should be triggered when a deployment is successful.
      */
     public function triggerDeploymentsOnForge(): self

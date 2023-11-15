@@ -10,6 +10,7 @@ final class Configuration
     public bool $disableCache = false;
     public bool $buildOnCI = true;
     public ?string $sshRemoteUser = null;
+    public bool $terminateHorizon = false;
 
     // Forge configuration
     public string $hostname;
