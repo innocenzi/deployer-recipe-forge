@@ -44,7 +44,7 @@ final class Forge
 
         ['sites' => $sites] = $this->forge->json(endpoint: 'sites');
 
-        foreach ($sites as $site) {
+        foreach ($sites ?? [] as $site) {
             if (!isset($site['repository'], $site['repository_branch'])) {
                 continue;
             }
@@ -77,7 +77,7 @@ final class Forge
             return;
         }
 
-        throw new \Exception("Could not find Forge site for repository [{$this->environment->repositoryName}]");
+        throw new \Exception("Could not find Forge site for repository [{$this->environment->repositoryName}]. Make sure the repository is configured on Forge. Forge might also have been temporarily down.");
     }
 
     private function configureHostAndVariables(): void
