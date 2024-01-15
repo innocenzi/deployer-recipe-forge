@@ -44,7 +44,7 @@ final class Forge
 
         ['sites' => $sites] = $this->forge->json(endpoint: 'sites');
 
-        foreach ($sites as $site) {
+        foreach ($sites ?? [] as $site) {
             if (!isset($site['repository'], $site['repository_branch'])) {
                 continue;
             }
